@@ -1,0 +1,134 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace DigitalClock
+{
+    public class Form1 : Form  // Removed 'partial' keyword
+    {
+        private Timer timer;
+        private Label clockLabel;
+        private Label dateLabel;
+        private Label ampmLabel;
+        private bool isFullScreen = true;
+
+        public Form1()
+        {
+            SetupClock();
+        }
+
+        private void SetupClock()
+        {
+            // Form settings for full screen
+            this.Text = "Digital Clock";
+            this.BackColor = Color.Black;
+            this.FormBorderStyle = FormBorderStyle.None;
+            this.WindowState = FormWindowState.Maximized;
+            this.TopMost = true;
+            
+            // Add escape key to exit full screen
+            this.KeyDown += Form1_KeyDown;
+
+            // Time Label - Linux compatible size
+            clockLabel = new Label();
+            clockLabel.Font = new Font("Segoe UI", 120, FontStyle.Bold);
+            clockLabel.ForeColor = Color.Lime;
+            clockLabel.BackColor = Color.Black;
+            clockLabel.TextAlign = ContentAlignment.MiddleRight;
+            clockLabel.Dock = DockStyle.Fill;
+            clockLabel.Text = "00:00:00";
+            clockLabel.AutoSize = false;
+
+            // AM/PM Label
+            ampmLabel = new Label();
+            ampmLabel.Font = new Font("Segoe UI", 48, FontStyle.Bold);
+            ampmLabel.ForeColor = Color.Lime;
+            ampmLabel.BackColor = Color.Black;
+            ampmLabel.TextAlign = ContentAlignment.MiddleLeft;
+            ampmLabel.Text = "";
+            ampmLabel.Dock = DockStyle.Fill;
+            ampmLabel.AutoSize = false;
+
+            // Date Label
+            dateLabel = new Label();
+            dateLabel.Font = new Font("Segoe UI", 28, FontStyle.Regular);
+            dateLabel.ForeColor = Color.Lime;
+            dateLabel.BackColor = Color.Black;
+            dateLabel.TextAlign = ContentAlignment.MiddleCenter;
+            dateLabel.Dock = DockStyle.Bottom;
+            dateLabel.Height = 80;
+            dateLabel.Text = DateTime.Now.ToString("dddd, MMMM dd, yyyy");
+            dateLabel.AutoSize = false;
+
+            // Panel for time and AM/PM
+            TableLayoutPanel mainPanel = new TableLayoutPanel();
+            mainPanel.Dock = DockStyle.Fill;
+            mainPanel.ColumnCount = 2;
+            mainPanel.RowCount = 1;
+            mainPanel.Controls.Add(clockLabel, 0, 0);
+            mainPanel.Controls.Add(ampmLabel, 1, 0);
+            mainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            mainPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+
+            // Add controls to form
+            this.Controls.Add(dateLabel);
+            this.Controls.Add(mainPanel);
+
+            // Timer setup
+            timer = new Timer();
+            timer.Interval = 1000;
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+            UpdateClock();
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Press ESC to exit full screen / close application
+            if (e.KeyCode == Keys.Escape)
+            {
+                Application.Exit();
+            }
+            // Press F11 to toggle full screen mode
+            else if (e.KeyCode == Keys.F11)
+            {
+                ToggleFullScreen();
+            }
+        }
+
+        private void ToggleFullScreen()
+        {
+            if (isFullScreen)
+            {
+                // Exit full screen
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.WindowState = FormWindowState.Normal;
+                this.Size = new Size(1000, 600);
+                this.TopMost = false;
+                isFullScreen = false;
+            }
+            else
+            {
+                // Enter full screen
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.WindowState = FormWindowState.Maximized;
+                this.TopMost = true;
+                isFullScreen = true;
+            }
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            UpdateClock();
+        }
+
+        private void UpdateClock()
+        {
+            DateTime now = DateTime.Now;
+            clockLabel.Text = now.ToString("hh:mm:ss");
+            ampmLabel.Text = now.ToString("tt");
+            dateLabel.Text = now.ToString("dddd, MMMM dd, yyyy");
+        }
+    }
+}
